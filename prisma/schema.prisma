@@ -1,0 +1,89 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id          String        @id @default(cuid())
+  githubId    String        @unique
+  username    String
+  avatarUrl   String?
+  followers   Int?
+  accessToken String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  repos       Repo[]
+  yearlyStats YearlyStats[]
+}
+
+model Repo {
+  id           String        @id @default(cuid())
+  repoId       String        @unique
+  name         String
+  stars        Int
+  forks        Int
+  language     String?
+  createdAt    DateTime
+  syncedAt     DateTime      @default(now())
+  userId       String
+  user         User          @relation(fields: [userId], references: [id])
+  commits      Commit[]
+  pullRequests PullRequest[]
+  issues       Issue[]
+}
+
+model Commit {
+  id        String   @id @default(cuid())
+  commitSha String   @unique
+  repoId    String
+  date      DateTime
+  year      Int
+  repo      Repo     @relation(fields: [repoId], references: [id])
+
+  @@index([repoId])
+  @@index([year])
+}
+
+model PullRequest {
+  id        String   @id @default(cuid())
+  prNumber  Int
+  repoId    String
+  createdAt DateTime
+  merged    Boolean
+  year      Int
+  repo      Repo     @relation(fields: [repoId], references: [id])
+
+  @@unique([repoId, prNumber])
+  @@index([repoId])
+  @@index([year])
+}
+
+model Issue {
+  id          String   @id @default(cuid())
+  issueNumber Int
+  repoId      String
+  createdAt   DateTime
+  closed      Boolean
+  year        Int
+  repo        Repo     @relation(fields: [repoId], references: [id])
+
+  @@unique([repoId, issueNumber])
+  @@index([repoId])
+  @@index([year])
+}
+
+model YearlyStats {
+  id           String  @id @default(cuid())
+  year         Int
+  totalCommits Int
+  totalPRs     Int
+  totalRepos   Int
+  topLanguage  String?
+  userId       String
+  user         User    @relation(fields: [userId], references: [id])
+
+  @@unique([userId, year])
+}
