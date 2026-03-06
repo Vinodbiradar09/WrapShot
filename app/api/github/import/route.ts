@@ -77,7 +77,7 @@ export async function POST() {
         },
       }),
     );
-    await db.$transaction(upsertData);
+    await db.$transaction(upsertData, { timeout:60000});
     return NextResponse.json(
       {
         message: "github data is imported",
