@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { year: string } },
+  { params }: { params: Promise<{ year: string }> },
 ) {
   try {
     const session = await getSession();
@@ -15,7 +15,8 @@ export async function GET(
       );
     }
 
-    const year = parseInt(params.year, 10);
+    const yearStr = await params;
+    const year = parseInt(yearStr.year);
     if (isNaN(year) || year < 2000 || year > new Date().getFullYear()) {
       return NextResponse.json(
         { message: "Invalid year", success: false },
