@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
         { status: 404 },
       );
     }
-    const repoIds = user.repos.map((repo) => repo.id);
+    const repoIds = user.repos.map((repo: { id: string }) => repo.id);
     // fetch all data's such as commits , prs , issue parallel
     const [commits, prs, issues] = await Promise.all([
       db.commit.findMany({
