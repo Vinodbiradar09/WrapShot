@@ -1,13 +1,25 @@
-"use client";
-import { signIn } from "next-auth/react";
+import { getServerSession } from "next-auth";
+import { redirect } from "next/navigation";
+import { auth } from "@/app/api/auth/[...nextauth]/route";
+import LoginClient from "./LoginClient";
+import { Metadata } from "next";
 
-export default function Login() {
+export const metadata: Metadata = { title: "Sign In" };
+
+interface Props {
+  searchParams: { callbackUrl?: string; error?: string };
+}
+
+export default async function LoginPage({ searchParams }: Props) {
+  const session = await getServerSession(auth);
+  if (session?.user) {
+    redirect(searchParams.callbackUrl ?? "/dashboard");
+  }
+
   return (
-    <button
-      onClick={() => signIn("github")}
-      className="bg-black text-white px-4 py-2 rounded"
-    >
-      Sign in with GitHub
-    </button>
+    <LoginClient
+      callbackUrl={searchParams.callbackUrl ?? "/dashboard"}
+      error={searchParams.error}
+    />
   );
 }
