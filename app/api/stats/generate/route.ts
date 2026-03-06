@@ -89,8 +89,8 @@ export async function POST(req: NextRequest) {
       Object.entries(monthCount).sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
 
     // longest commit streak
-    const commitDays = [
-      ...new Set(
+    const commitDays: string[] = [
+      ...new Set<string>(
         commits.map((c: Commits) => {
           const d = new Date(c.date);
           return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;

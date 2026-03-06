@@ -170,7 +170,7 @@ export interface WrappedData {
 }
 
 export interface Commits {
-  date: Date;
+  date: Date | string;
   additions: number | null;
   repoId: string;
   deletions: number | null;
