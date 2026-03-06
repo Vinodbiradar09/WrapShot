@@ -126,7 +126,7 @@ export default async function WrappedPage({ params }: Props) {
     ? {
         commitsDelta: stats.totalCommits - prevStats.totalCommits,
         prsDelta: stats.totalPRs - prevStats.totalPRs,
-        streakDelta: stats.longestStreak - prevStats.longestStreak,
+        streakDelta: stats.longestStreak! - prevStats.longestStreak!,
       }
     : null;
 
@@ -151,8 +151,8 @@ export default async function WrappedPage({ params }: Props) {
     closedIssues: stats.closedIssues,
     totalRepos: stats.totalRepos,
     topLanguage: stats.topLanguage,
-    mostActiveMonth: stats.mostActiveMonth,
-    longestStreak: stats.longestStreak,
+    mostActiveMonth: stats.mostActiveMonth!,
+    longestStreak: stats.longestStreak!,
     totalAdditions: stats.totalAdditions ?? 0,
     totalDeletions: stats.totalDeletions ?? 0,
     developerScore: Math.min(
@@ -160,7 +160,7 @@ export default async function WrappedPage({ params }: Props) {
       Math.round(
         (stats.totalCommits / 10) * 0.4 +
           (stats.mergedPRs / Math.max(stats.totalPRs, 1)) * 100 * 0.3 +
-          stats.longestStreak * 0.3,
+          stats.longestStreak! * 0.3,
       ),
     ),
     prMergeRate:
