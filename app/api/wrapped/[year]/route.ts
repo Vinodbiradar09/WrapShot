@@ -1,4 +1,5 @@
 import { getSession } from "@/app/types/getSession";
+import { Repo } from "@/app/types/types";
 import { db } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -51,7 +52,7 @@ export async function GET(
       );
     }
 
-    const repoIds = user.repos.map((r) => r.id);
+    const repoIds = user.repos.map((r: Repo) => r.id);
 
     // fetch all year-scoped data in parallel
     const [commits, prs, issues, prevYearStats] = await Promise.all([
@@ -96,8 +97,8 @@ export async function GET(
     }
 
     const topRepos = user.repos
-      .filter((repo) => commitsByRepo[repo.id] != null)
-      .map((repo) => ({
+      .filter((repo: Repo) => commitsByRepo[repo.id] != null)
+      .map((repo: Repo) => ({
         id: repo.id,
         name: repo.name,
         language: repo.language,

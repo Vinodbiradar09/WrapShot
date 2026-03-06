@@ -13,6 +13,18 @@ export interface GithubRepo {
   created_at: string;
 }
 
+export interface Repo {
+  name: string;
+  id: string;
+  createdAt: Date;
+  repoId: string;
+  stars: number;
+  forks: number;
+  language: string | null;
+  syncedAt: Date;
+  userId: string;
+}
+
 export interface WrappedStats {
   totalCommits: number;
   totalPRs: number;
@@ -155,4 +167,11 @@ export interface WrappedData {
   topRepos: TopRepoFE[];
   yoy: YoYFE | null;
   aiSummary: AISummary | null;
+}
+
+export interface Commits {
+  date: Date;
+  additions: number | null;
+  repoId: string;
+  deletions: number | null;
 }

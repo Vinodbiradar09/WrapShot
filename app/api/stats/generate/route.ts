@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/prisma";
 import { getSession } from "@/app/types/getSession";
+import { Commits, Repo } from "@/app/types/types";
 
 export async function POST(req: NextRequest) {
   try {
@@ -57,15 +58,19 @@ export async function POST(req: NextRequest) {
     ]);
     const totalCommits = commits.length;
     const totalPRs = prs.length;
-    const mergedPRs = prs.filter((pr) => pr.merged).length;
+    const mergedPRs = prs.filter((pr: { merged: boolean }) => pr.merged).length;
     const totalIssues = issues.length;
-    const closedIssues = issues.filter((issue) => issue.closed).length;
+    const closedIssues = issues.filter(
+      (issue: { closed: boolean }) => issue.closed,
+    ).length;
 
     // repos which are active this year
-    const activeRepoIds = new Set(commits.map((c) => c.repoId));
+    const activeRepoIds = new Set(commits.map((c: Commits) => c.repoId));
     const totalRepos = activeRepoIds.size;
     // top language
-    const activeRepos = user.repos.filter((repo) => activeRepoIds.has(repo.id));
+    const activeRepos = user.repos.filter((repo: Repo) =>
+      activeRepoIds.has(repo.id),
+    );
     const langCount: Record<string, number> = {};
     for (const rep of activeRepos) {
       if (rep.language) {
@@ -86,7 +91,7 @@ export async function POST(req: NextRequest) {
     // longest commit streak
     const commitDays = [
       ...new Set(
-        commits.map((c) => {
+        commits.map((c: Commits) => {
           const d = new Date(c.date);
           return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
         }),
