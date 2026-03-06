@@ -1,10 +1,10 @@
-import { getServerSession } from "next-auth";
+import { getSession } from "@/app/types/getSession";
 import { db } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
   try {
-    const session = await getServerSession();
+    const session = await getSession();
     if (!session?.accessToken) {
       return NextResponse.json(
         {
@@ -16,17 +16,17 @@ export async function POST(req: NextRequest) {
     }
     const body = await req.json();
     const year = body.year;
-    if (!year) {
+    if (!year || typeof year !== "number") {
       return NextResponse.json(
         {
           message: "year is required",
           success: false,
         },
-        { status: 402 },
+        { status: 400 },
       );
     }
-    const since = new Date(`${year}-01-01`).toISOString();
-    const until = new Date(`${year}-12-31`).toISOString();
+    const since = new Date(`${year}-01-01T00:00:00Z`).toISOString();
+    const until = new Date(`${year}-12-31T23:59:59Z`).toISOString();
     const token = session.accessToken;
     const user = await db.user.findUnique({
       where: {
@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
       );
     }
     const username = user.username;
-
+    let totalImported = 0;
     for (const repo of user.repos) {
       let page = 1;
       let hasMore = true;
@@ -62,7 +62,12 @@ export async function POST(req: NextRequest) {
         );
 
         if (!res.ok) {
-          throw new Error("Github api error");
+          const status = res.status;
+          if (status === 409 || status === 404) {
+            hasMore = false;
+            break;
+          }
+          throw new Error(`Github api error ${res.status} on ${repo.name}`);
         }
         const commits = await res.json();
         if (!Array.isArray(commits) || commits.length === 0) {
@@ -70,17 +75,25 @@ export async function POST(req: NextRequest) {
           break;
         }
         const data = commits.map((commit) => ({
-          commitSha: commit.sha,
-          date: new Date(commit.commit.author.date),
+          commitSha: commit.sha as string,
+          date: new Date(commit.commit.author.date as string),
           year,
           repoId: repo.id,
         }));
 
-        await db.commit.createMany({
-          data,
-          skipDuplicates: true,
-        });
-        page++;
+        if (data.length > 0) {
+          await db.commit.createMany({
+            data,
+            skipDuplicates: true,
+          });
+          totalImported += data.length;
+        }
+
+        if (commits.length < 100) {
+          hasMore = false;
+        } else {
+          page++;
+        }
       }
     }
 
@@ -88,6 +101,7 @@ export async function POST(req: NextRequest) {
       {
         message: `commits are imported for${year}`,
         success: true,
+        totalImported,
       },
       { status: 200 },
     );

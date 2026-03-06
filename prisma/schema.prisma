@@ -40,6 +40,9 @@ model Commit {
   commitSha String   @unique
   repoId    String
   date      DateTime
+  author    String?
+  additions Int?
+  deletions Int?
   year      Int
   repo      Repo     @relation(fields: [repoId], references: [id])
 
@@ -76,14 +79,22 @@ model Issue {
 }
 
 model YearlyStats {
-  id           String  @id @default(cuid())
-  year         Int
-  totalCommits Int
-  totalPRs     Int
-  totalRepos   Int
-  topLanguage  String?
-  userId       String
-  user         User    @relation(fields: [userId], references: [id])
+  id              String  @id @default(cuid())
+  year            Int
+  totalCommits    Int
+  totalPRs        Int
+  totalRepos      Int
+  topLanguage     String?
+  userId          String
+  user            User    @relation(fields: [userId], references: [id])
+  totalIssues     Int     @default(0)
+  mergedPRs       Int     @default(0)
+  closedIssues    Int     @default(0)
+  mostActiveMonth Int? // 1-12
+  longestStreak   Int? // days
+  totalAdditions  Int?
+  totalDeletions  Int?
+  aiSummary       String? // cached gemini response
 
   @@unique([userId, year])
 }

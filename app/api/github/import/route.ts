@@ -1,19 +1,11 @@
-import { getServerSession } from "next-auth";
+import { getSession } from "@/app/types/getSession";
 import { db } from "@/lib/prisma";
 import { NextResponse } from "next/server";
-
-interface GithubRepo {
-  id: number;
-  name: string;
-  stargazers_count: number;
-  forks_count: number;
-  language: string | null;
-  created_at: string;
-}
+import { GithubRepo } from "@/app/types/types";
 
 export async function POST() {
   try {
-    const session = await getServerSession();
+    const session = await getSession();
     if (!session || !session.accessToken) {
       return NextResponse.json(
         {

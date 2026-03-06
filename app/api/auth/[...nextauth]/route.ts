@@ -1,14 +1,9 @@
-import NextAuth from "next-auth";
+import NextAuth, { NextAuthOptions } from "next-auth";
 import GitHubProvider from "next-auth/providers/github";
 import { db } from "@/lib/prisma";
+import { GitHubProfile } from "@/app/types/types";
 
-interface GitHubProfile {
-  id: number;
-  login: string;
-  avatar_url: string;
-}
-
-const handler = NextAuth({
+export const auth: NextAuthOptions = {
   providers: [
     GitHubProvider({
       clientId: process.env.GITHUB_CLIENT_ID!,
@@ -49,6 +44,7 @@ const handler = NextAuth({
       return session;
     },
   },
-});
+};
+const handler = NextAuth(auth);
 
 export { handler as GET, handler as POST };
